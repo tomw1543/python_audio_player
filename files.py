@@ -11,7 +11,7 @@ class FileManager:
     @staticmethod
     def  open_files():
         if platform.system() == "Windows":
-                path = r"C:\Users\tomwe\OneDrive\Documents\Sound_Engine" # REMEMBER TO CHANGE BACK TO "C:\\"
+                path = r"C:" # REMEMBER TO CHANGE BACK TO "C:\\"
         else:
                 path = "/" # Default to root on Unix-like systems
         
@@ -38,9 +38,15 @@ class FileManager:
         if paths:
            self.cleaned_path = paths.group(0)
            return self.cleaned_path
-            
-           
-    def upload_files(self):
+
+
+    @staticmethod        
+    def upload_files(self): 
+        pass    
+    
+
+
+    def play_files(self):
         
             if self.current_file:
                 file_end_group = re.search(r'\.[^.]+$', self.current_file) # Extract file extension

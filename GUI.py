@@ -28,21 +28,7 @@ class AudioPlayerApp:
 
         # --- Menu ---
         menubar = tk.Menu(root)
-
-        file_menu = tk.Menu(menubar, tearoff=0)
-        file_menu.add_command(label="Open Files", command=FileManager.open_files)
-        
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=root.quit)
-        menubar.add_cascade(label="File", menu=file_menu)
-
-        
-
-        help_menu = tk.Menu(menubar, tearoff=0)
-        help_menu.add_command(label="About", command=self.about)
-        menubar.add_cascade(label="Help", menu=help_menu)
-
-        root.config(menu=menubar)
+        # ...existing code...
 
         # --- Toolbar ---
         toolbar = tk.Frame(root, bd=1, relief=tk.RAISED)
@@ -59,6 +45,10 @@ class AudioPlayerApp:
         self.btn_next = tk.Button(toolbar, text="⏭", command=self.play_next)
         self.btn_next.pack(side=tk.LEFT, padx=2, pady=2)
 
+        # --- Upload Files Button ---
+        self.btn_upload = tk.Button(toolbar, text="Upload Files", command=self.show_upload_dialog)
+        self.btn_upload.pack(side=tk.LEFT, padx=5)
+
         volume_label = tk.Label(toolbar, text="Vol")
         volume_label.pack(side=tk.LEFT, padx=5)
 
@@ -70,6 +60,7 @@ class AudioPlayerApp:
         self.btn_mute.pack(side=tk.LEFT, padx=5)
 
         toolbar.pack(side=tk.TOP, fill=tk.X)
+
 
         # --- Playlist and Track Info ---
         main_frame = tk.PanedWindow(root, orient=tk.HORIZONTAL)
@@ -86,8 +77,8 @@ class AudioPlayerApp:
         self.text_box.pack(fill="y", padx=(2,0), pady=(0, 10), anchor="n")
         self.text_box.drop_target_register(DND_FILES)
         self.text_box.dnd_bind("<<Drop>>", self.drop_files)
-        upload_btn = tk.Button(right_frame, text="Upload Files", command=self.upload_files)
-        upload_btn.pack(side="bottom", pady=10)
+        play_btn = tk.Button(right_frame, text="Play", command=self.play_files)
+        play_btn.pack(side="bottom", pady=10)
 
         
 
@@ -110,11 +101,11 @@ class AudioPlayerApp:
 
     # --- Placeholder Functions ---
 
-    def upload_files(self):
+    def play_files(self):
         self.text_box.delete(0, tk.END)
         
-        uploaded_files= FileManager.upload_files(self)
-        self.lbl_title.config(text=uploaded_files)
+        play_files= FileManager.play_files(self)
+        self.lbl_title.config(text=play_files)
     def drop_files(self, event):
         file = FileManager.drop_files(self, event)
         self.text_box.insert(tk.END, file)
@@ -139,6 +130,22 @@ class AudioPlayerApp:
 
     def seek(self, value):
         pass
+    def show_upload_dialog(self):
+        files = filedialog.askopenfilenames(
+            title="Select Audio Files",
+            filetypes=[("Audio Files", "*.mp3 *.wav *.ogg *.flac"), ("All Files", "*.*")]
+        )
+        if files:
+            popup = tk.Toplevel(self.root)
+            popup.title("Uploaded Files")
+            popup.geometry("400x300")
+            tk.Label(popup, text="Uploaded Files:").pack(pady=5)
+            listbox = tk.Listbox(popup, width=50, height=12)
+            listbox.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+            for f in files:
+                listbox.insert(tk.END, f)
+            tk.Button(popup, text="Close", command=popup.destroy).pack(pady=5)
+
 
     
     def about(self):
