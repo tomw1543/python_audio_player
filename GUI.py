@@ -10,6 +10,7 @@ Your task will be to fill them in step-by-step.
 """
 
 #import files
+from UploadPopupGUI import UploadPopup
 from files import FileManager
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk 
@@ -109,6 +110,8 @@ class AudioPlayerApp:
     def drop_files(self, event):
         file = FileManager.drop_files(self, event)
         self.text_box.insert(tk.END, file)
+    
+
 
     def play_previous(self):
         pass
@@ -130,7 +133,15 @@ class AudioPlayerApp:
 
     def seek(self, value):
         pass
+
+    
     def show_upload_dialog(self):
+        print("Upload dialog opened")
+        # Open the custom upload popup
+        UploadPopup(self.root)
+
+
+        '''
         files = filedialog.askopenfilenames(
             title="Select Audio Files",
             filetypes=[("Audio Files", "*.mp3 *.wav *.ogg *.flac"), ("All Files", "*.*")]
@@ -146,7 +157,7 @@ class AudioPlayerApp:
                 listbox.insert(tk.END, f)
             tk.Button(popup, text="Close", command=popup.destroy).pack(pady=5)
 
-
+'''
     
     def about(self):
         messagebox.showinfo("About", "Audio Player Skeleton\n\nTkinter GUI.\nNo playback functionality implemented yet.")

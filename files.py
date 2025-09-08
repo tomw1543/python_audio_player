@@ -6,10 +6,11 @@ import regex as re
 import os
 import platform
 import pygame, sys, time
+import shutil
 pygame.mixer.init()
 class FileManager:
     @staticmethod
-    def  open_files():
+    def open_files():
         if platform.system() == "Windows":
                 path = r"C:" # REMEMBER TO CHANGE BACK TO "C:\\"
         else:
@@ -40,12 +41,27 @@ class FileManager:
            return self.cleaned_path
 
 
-    @staticmethod        
+           
     def upload_files(self): 
-        pass    
+        src = self.current_file
+        dst = os.getcwd()
+        if self.current_file:
+            if os.path.exists(src):
+                 shutil.copy(src, dst) 
+            else:
+                print("Source file does not exist.")
+                return  
+        print("Uploading file...")
+        print(f"Source: {src}")
+        print(f"Destination: {dst}")
+        time.sleep(5) # Simulate upload time
+        print("File uploaded successfully.")
+        
+
+
     
 
-
+    
     def play_files(self):
         
             if self.current_file:
