@@ -6,11 +6,13 @@ import regex as re
 import os
 import platform
 import pygame, sys, time
-import shutil
+import shutil #for shell commands in python (used to copy files)
 pygame.mixer.init()
 class FileManager:
+    def __init__(self):
+        self.current_file = None
     @staticmethod
-    def open_files():
+    def browse_files():
         if platform.system() == "Windows":
                 path = r"C:" # REMEMBER TO CHANGE BACK TO "C:\\"
         else:
@@ -27,35 +29,49 @@ class FileManager:
                 os.system(f'xdg-open "{path}"')
             
         
-    @staticmethod      
+    
     def drop_files(self,event):
 
         
         raw_str = event.data.strip("{}")
-        self.current_file = raw_str
-        print(self.current_file)
-         # Handle different OS path formats
-        paths = re.search(r'[^\\/]+$', raw_str)
-        if paths:
-           self.cleaned_path = paths.group(0)
-           return self.cleaned_path
+        current_file = raw_str
+        print(current_file)
+        return current_file
+        
+        
+        
+    @staticmethod
+    def open_files(): 
+         cwd = os.getcwd()
+         files_arr = []
+         for file in os.listdir(cwd):
+              if file.endswith(('.mp3', '.wav', '.ogg')):
+                   file_path = os.path.join(cwd,file)
+                   files_arr.append(file_path)
+                   print(file_path)
+              else:
+                   print(f"Skipped non-audio file: {file}")
+         return files_arr
+            
+
+        
+
 
 
            
-    def upload_files(self): 
-        src = self.current_file
+    def upload_files(self, files): 
+        print(files)
         dst = os.getcwd()
-        if self.current_file:
+        for src in files:
+            if src == dst:
+                print("Source and destination cannot be the same.")
+                continue
             if os.path.exists(src):
-                 shutil.copy(src, dst) 
+                shutil.copy(src, dst) 
+                print(f"Uploaded: {src}")
             else:
                 print("Source file does not exist.")
-                return  
-        print("Uploading file...")
-        print(f"Source: {src}")
-        print(f"Destination: {dst}")
-        time.sleep(5) # Simulate upload time
-        print("File uploaded successfully.")
+         
         
 
 

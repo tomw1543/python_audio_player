@@ -8,7 +8,7 @@ import os
 import platform
 import pygame, sys, time
 class UploadPopup:
-    def __init__(self, parent):
+    def __init__(self, parent, app=None):
         self.top = tk.Toplevel(parent)
         self.top.title("Upload Audio Files")
         self.top.geometry("400x300")
@@ -52,18 +52,37 @@ class UploadPopup:
         # Status label
         status_label = tk.Label(frame, text="Waiting for file upload", bg="white", fg="#6c757d")
         status_label.pack(pady=5)
+        self.file_manager = FileManager() # Create an instance of the file manager
+        self.filesarray = [] # Instance variable
+        self.rawstrfilearray = [] #second array to hold raw file paths
+        self.app = app
 
     def browse_files(self):
-        return FileManager.open_files()
-
-    def drop_files(self, event, filesarray=[]):
-        file = FileManager.drop_files(self, event)
-        filesarray.append(file)
-        file = "\n".join(filesarray)
-        self.upload_container.config(text=file)
+        return FileManager.browse_files()
+    
+    
+    def drop_files(self, event):
+        raw_file = FileManager.drop_files(self, event)
+        paths = re.search(r'[^\\/]+$', raw_file)
+        if paths:
+           cleaned_path = paths.group(0)
+        self.rawstrfilearray.append(raw_file)   
+        self.filesarray.append(cleaned_path)
+        cleaned_path = "\n".join(self.filesarray)
+        self.upload_container.config(text=cleaned_path)
+        
 
     def upload_files(self):
-        return FileManager.upload_files(self)
+        self.upload_container.config(text="Uploading files...")
+        self.file_manager.upload_files(self.rawstrfilearray)  # Pass the list
+        self.upload_container.config(text="Upload complete!")
+        self.filesarray.clear()
+        self.rawstrfilearray.clear()
+        if self.app:
+            self.app.open_files() 
+        
+        
+    
 
     def cancel_upload(self):
         pass

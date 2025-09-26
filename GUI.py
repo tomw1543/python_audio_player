@@ -96,11 +96,29 @@ class AudioPlayerApp:
 
         main_frame.add(right_frame)
 
+
         # --- Status Bar ---
         self.status = tk.Label(root, text="Ready", bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self.status.pack(side=tk.BOTTOM, fill=tk.X)
 
-    # --- Placeholder Functions ---
+        # Initilized objects
+        self.file_manager = FileManager() # Create an instance of the file manager
+        self.file_dict = {} # Dictionary to hold file paths and names
+        self.filesarr = self.file_manager.open_files() #list of raw audio file paths in cwd
+   
+   
+   
+    # --- Functions ---
+
+    def open_files(self):
+        self.file_dict.clear()
+        self.playlist_box.delete(0, tk.END)  # Clear existing entries
+        
+        for file in self.filesarr:
+            cleaned_file = re.sub(r'.*[\\\/]([^\\\/]+)\.[^.]+$', r'\1', file)  # Remove path, keep filename
+            self.file_dict[cleaned_file] = file  # Map cleaned name to full path
+            self.playlist_box.insert(tk.END, cleaned_file)  # Insert cleaned name into playlist box
+        
 
     def play_files(self):
         self.text_box.delete(0, tk.END)
@@ -110,6 +128,15 @@ class AudioPlayerApp:
     def drop_files(self, event):
         file = FileManager.drop_files(self, event)
         self.text_box.insert(tk.END, file)
+
+    
+    def toggle_play_pause(self, event): 
+        selection = event.widget.curselection()
+        if selection:
+            index = selection[0]
+            file_path = self.playlist_box.get(index)
+            print(f"Playing file: {file_path}")
+
     
 
 
@@ -119,8 +146,7 @@ class AudioPlayerApp:
     def play_next(self):
         pass
 
-    def toggle_play_pause(self):
-        pass
+  
 
     def stop(self):
         pass
@@ -138,7 +164,7 @@ class AudioPlayerApp:
     def show_upload_dialog(self):
         print("Upload dialog opened")
         # Open the custom upload popup
-        UploadPopup(self.root)
+        UploadPopup(self.root, app=self)  # Make sure to pass 'self' as 'app'
 
 
         '''
@@ -166,6 +192,7 @@ class AudioPlayerApp:
 def main():
     root = TkinterDnD.Tk()
     app = AudioPlayerApp(root)
+    root.after(100, app.open_files) # Call open_files after 100ms
     root.mainloop()
 
 
