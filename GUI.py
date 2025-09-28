@@ -20,6 +20,7 @@ import regex as re
 import os
 import platform
 import pygame, sys, time
+from PIL import Image, ImageTk
 
 class AudioPlayerApp:
     def __init__(self, root):
@@ -37,7 +38,7 @@ class AudioPlayerApp:
         self.btn_prev = tk.Button(toolbar, text="⏮", command=self.play_previous)
         self.btn_prev.pack(side=tk.LEFT, padx=2, pady=2)
 
-        self.btn_play = tk.Button(toolbar, text="▶️", command=self.toggle_play_pause)
+        self.btn_play = tk.Button(toolbar, text="▶️", command=self.stop)
         self.btn_play.pack(side=tk.LEFT, padx=2, pady=2)
 
         self.btn_stop = tk.Button(toolbar, text="⏹", command=self.stop)
@@ -69,20 +70,34 @@ class AudioPlayerApp:
 
         self.playlist_box = tk.Listbox(main_frame)
         main_frame.add(self.playlist_box)
+        self.playlist_box.bind("<Double-Button-1>", self.get_selected_file)  # Bind double-click event
 
+        # Text box to display eminem
+        # Load and resize
+        img = Image.open("Eminem.png")
+        img = img.resize((200, 200))   # width=200, height=200
+        self.img = ImageTk.PhotoImage(img)
+
+        img2 = Image.open("tame.png")
+        img2 = img2.resize((200, 200))
+        self.img2 = ImageTk.PhotoImage(img2)
+
+        # Place inside Label
         right_frame = tk.Frame(main_frame)
+
+       
+
         self.lbl_title = tk.Label(right_frame, text="Drop audio files here or use File → Open…", wraplength=400)
-        self.lbl_title.pack(pady=10)
-        # Text box to display dropped files
-        self.text_box = tk.Listbox(right_frame , width=40, height=15)
-        self.text_box.pack(fill="y", padx=(2,0), pady=(0, 10), anchor="n")
-        self.text_box.drop_target_register(DND_FILES)
-        self.text_box.dnd_bind("<<Drop>>", self.drop_files)
+        self.lbl_title.pack(pady=10, anchor="n")  # anchor north/top
+
+        self.image_label = tk.Label(right_frame, image=self.img2)
+        self.image_label.pack(padx=20, pady=20)  # anchor north/top
+
+        # Play button at the bottom
         play_btn = tk.Button(right_frame, text="Play", command=self.play_files)
         play_btn.pack(side="bottom", pady=10)
 
-        
-
+        # Time frame below play button
         time_frame = tk.Frame(right_frame)
         self.lbl_time_current = tk.Label(time_frame, text="0:00")
         self.lbl_time_current.pack(side=tk.LEFT)
@@ -121,21 +136,34 @@ class AudioPlayerApp:
         
 
     def play_files(self):
-        self.text_box.delete(0, tk.END)
+        self.Album_cover_box.delete(0, tk.END)
         
         play_files= FileManager.play_files(self)
         self.lbl_title.config(text=play_files)
     def drop_files(self, event):
         file = FileManager.drop_files(self, event)
-        self.text_box.insert(tk.END, file)
+        self.Album_cover_box.insert(tk.END, file)
 
     
-    def toggle_play_pause(self, event): 
+    def get_selected_file(self, event): 
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
-            file_path = self.playlist_box.get(index)
-            print(f"Playing file: {file_path}")
+            file_name = self.playlist_box.get(index)
+            self.file_path = self.file_dict[file_name]
+            print(f"Playing file: {self.file_path}")
+            self.lbl_title.config(text=f"Playing: {file_name}")
+            self.image_label.config(image=self.img)  # Update to the desired image impliment functionality later
+            FileManager.play_files(self, self.file_path)
+            
+
+
+
+    
+    def play_pause(self, event):
+        pass
+
+            
 
     
 

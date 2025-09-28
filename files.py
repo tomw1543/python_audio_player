@@ -78,22 +78,17 @@ class FileManager:
     
 
     
-    def play_files(self):
+    def play_files(self, file_path):
         
-            if self.current_file:
-                file_end_group = re.search(r'\.[^.]+$', self.current_file) # Extract file extension
+            if file_path:
+                file_end_group = re.search(r'\.[^.]+$', file_path) # Extract file extension
                 file_end = file_end_group.group(0)
                 print(file_end)
                 if file_end.lower() not in [".mp3", ".wav", ".ogg"]: 
                     return "Invalid file type. Please select an audio file."
                 else:
-
-            
-                    file_path = self.current_file
                     pygame.mixer.music.load(file_path)
                     pygame.mixer.music.play()
-                    return f"Playing: {self.cleaned_path}"
-
             else:
                 return "No file selected"
 
