@@ -91,8 +91,18 @@ class FileManager:
                     pygame.mixer.music.play()
             else:
                 return "No file selected"
+            
+
+    def pause_files(self):
+        pygame.mixer.music.pause()
 
 
+    def unpause_files(self):
+        pygame.mixer.music.unpause()   
+
+
+    def set_volume(self, value):
+        pygame.mixer.music.set_volume(value)
 
         #self.playlist_box.delete(0, tk.END)  # Clear existing entries
 

@@ -35,18 +35,6 @@ class AudioPlayerApp:
         # --- Toolbar ---
         toolbar = tk.Frame(root, bd=1, relief=tk.RAISED)
 
-        self.btn_prev = tk.Button(toolbar, text="⏮", command=self.play_previous)
-        self.btn_prev.pack(side=tk.LEFT, padx=2, pady=2)
-
-        self.btn_play = tk.Button(toolbar, text="▶️", command=self.stop)
-        self.btn_play.pack(side=tk.LEFT, padx=2, pady=2)
-
-        self.btn_stop = tk.Button(toolbar, text="⏹", command=self.stop)
-        self.btn_stop.pack(side=tk.LEFT, padx=2, pady=2)
-
-        self.btn_next = tk.Button(toolbar, text="⏭", command=self.play_next)
-        self.btn_next.pack(side=tk.LEFT, padx=2, pady=2)
-
         # --- Upload Files Button ---
         self.btn_upload = tk.Button(toolbar, text="Upload Files", command=self.show_upload_dialog)
         self.btn_upload.pack(side=tk.LEFT, padx=5)
@@ -58,8 +46,10 @@ class AudioPlayerApp:
         self.volume_slider.set(80)
         self.volume_slider.pack(side=tk.LEFT, padx=2)
 
-        self.btn_mute = tk.Checkbutton(toolbar, text="Mute", command=self.toggle_mute)
+        self.var_mute = tk.BooleanVar()
+        self.btn_mute = tk.Checkbutton(toolbar, text="Mute", variable=self.var_mute, command=self.toggle_mute)
         self.btn_mute.pack(side=tk.LEFT, padx=5)
+        
 
         toolbar.pack(side=tk.TOP, fill=tk.X)
 
@@ -87,15 +77,29 @@ class AudioPlayerApp:
 
        
 
-        self.lbl_title = tk.Label(right_frame, text="Drop audio files here or use File → Open…", wraplength=400)
+        self.lbl_title = tk.Label(right_frame, text="Add audio files by selecting Upload Files -> Browse Files", wraplength=400)
         self.lbl_title.pack(pady=10, anchor="n")  # anchor north/top
-
+        
         self.image_label = tk.Label(right_frame, image=self.img2)
         self.image_label.pack(padx=20, pady=20)  # anchor north/top
 
         # Play button at the bottom
-        play_btn = tk.Button(right_frame, text="Play", command=self.play_files)
-        play_btn.pack(side="bottom", pady=10)
+        controls_frame = tk.Frame(right_frame)
+        controls_frame.pack(side="bottom", pady=(10,50))
+
+        # Buttons arranged left to right inside the controls frame
+        self.btn_prev = tk.Button(controls_frame, text="⏮", command=self.play_previous)
+        self.btn_prev.pack(side="left", padx=5)
+
+        self.btn_play = tk.Button(controls_frame, text="▶️", command=self.play_pause)
+        self.btn_play.pack(side="left", padx=5)
+        self.btn_play.bind('<space>', self.play_pause)
+        
+        
+
+
+        self.btn_next = tk.Button(controls_frame, text="⏭", command=self.play_next)
+        self.btn_next.pack(side="left", padx=5) 
 
         # Time frame below play button
         time_frame = tk.Frame(right_frame)
@@ -120,6 +124,7 @@ class AudioPlayerApp:
         self.file_manager = FileManager() # Create an instance of the file manager
         self.file_dict = {} # Dictionary to hold file paths and names
         self.filesarr = self.file_manager.open_files() #list of raw audio file paths in cwd
+        self.file_playing_counter = 0 #is set to 0 everytime a new file is played
    
    
    
@@ -155,13 +160,30 @@ class AudioPlayerApp:
             self.lbl_title.config(text=f"Playing: {file_name}")
             self.image_label.config(image=self.img)  # Update to the desired image impliment functionality later
             FileManager.play_files(self, self.file_path)
+            self.file_playing_counter = 1
+            self.btn_play.config(text= "⏸️")
             
 
 
 
     
-    def play_pause(self, event):
-        pass
+    def play_pause(self, event = None):
+        current_text = self.btn_play.cget("text")
+
+        # Prevent trying to play before a file is selected
+        if not hasattr(self, 'file_path'):
+            print("No file selected yet.")
+            return
+        
+        if current_text == "▶️":
+            FileManager.unpause_files(self)
+            self.btn_play.config(text= "⏸️")
+        elif current_text == "⏸️":
+            FileManager.pause_files(self)
+            self.btn_play.config(text= "▶️")
+
+
+        
 
             
 
@@ -180,10 +202,16 @@ class AudioPlayerApp:
         pass
 
     def set_volume(self, value):
-        pass
+        value = self.volume_slider.get()
+        FileManager.set_volume(self, int(value) / 100)  # Scale 0-100 to 0.0-1.0
 
-    def toggle_mute(self):
-        pass
+    def toggle_mute(self, ):
+        if self.var_mute.get():
+            pygame.mixer.music.set_volume(0)
+        else:
+            value = self.volume_slider.get()
+            pygame.mixer.music.set_volume(int(value) / 100)
+        
 
     def seek(self, value):
         pass
