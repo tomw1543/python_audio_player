@@ -7,6 +7,7 @@ import os
 import platform
 import pygame, sys, time
 import shutil #for shell commands in python (used to copy files)
+from mutagen import File #for reading metadata from audio files
 pygame.mixer.init()
 class FileManager:
     def __init__(self):
@@ -104,5 +105,16 @@ class FileManager:
     def set_volume(self, value):
         pygame.mixer.music.set_volume(value)
 
-        #self.playlist_box.delete(0, tk.END)  # Clear existing entries
+    def getFileLength(self, file_path):
+         audio = File(file_path)
+         if audio is not None: 
+              global total_length
+              total_length = audio.info.length
+              return total_length #length in seconds 
+         else: 
+              return 0
+         
+    def seek(self, position):
+         pass
+         
 

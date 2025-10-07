@@ -59,8 +59,8 @@ class AudioPlayerApp:
         main_frame.pack(fill=tk.BOTH, expand=1)
 
         self.playlist_box = tk.Listbox(main_frame)
+        self.playlist_box.bind('<<ListboxSelect>>', lambda event: (self.get_selected_file(), self.songLength()))
         main_frame.add(self.playlist_box)
-        self.playlist_box.bind("<Double-Button-1>", self.get_selected_file)  # Bind double-click event
 
         # Text box to display eminem
         # Load and resize
@@ -106,10 +106,16 @@ class AudioPlayerApp:
         self.lbl_time_current = tk.Label(time_frame, text="0:00")
         self.lbl_time_current.pack(side=tk.LEFT)
 
-        self.seek_slider = tk.Scale(time_frame, from_=0, to=1000, orient=tk.HORIZONTAL, command=self.seek)
+        self.seek_slider = tk.Scale(time_frame, from_=0, to=100, orient=tk.HORIZONTAL, command=self.seek)
+        self.seek_slider.set(0)
+
         self.seek_slider.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-        self.lbl_time_total = tk.Label(time_frame, text="--:--")
+        self.slider_label = tk.Label(time_frame, text=0)
+        self.slider_label.pack(pady=10)
+
+
+        self.lbl_time_total = tk.Label(time_frame, text=())
         self.lbl_time_total.pack(side=tk.RIGHT)
         time_frame.pack(fill=tk.X, pady=5)
 
@@ -149,17 +155,18 @@ class AudioPlayerApp:
         file = FileManager.drop_files(self, event)
         self.Album_cover_box.insert(tk.END, file)
 
-    
-    def get_selected_file(self, event): 
-        selection = event.widget.curselection()
+
+    def get_selected_file(self): 
+        selection = self.playlist_box.curselection()
         if selection:
             index = selection[0]
             file_name = self.playlist_box.get(index)
-            self.file_path = self.file_dict[file_name]
-            print(f"Playing file: {self.file_path}")
+            global file_path
+            file_path = self.file_dict[file_name]
+            print(f"Playing file: {file_path}")
             self.lbl_title.config(text=f"Playing: {file_name}")
             self.image_label.config(image=self.img)  # Update to the desired image impliment functionality later
-            FileManager.play_files(self, self.file_path)
+            FileManager.play_files(self, file_path)
             self.file_playing_counter = 1
             self.btn_play.config(text= "⏸️")
             
@@ -167,7 +174,7 @@ class AudioPlayerApp:
 
 
     
-    def play_pause(self, event = None):
+    def play_pause(self):
         current_text = self.btn_play.cget("text")
 
         # Prevent trying to play before a file is selected
@@ -191,21 +198,51 @@ class AudioPlayerApp:
 
 
     def play_previous(self):
-        pass
+       selection = self.playlist_box.curselection()
+       if selection:
+           index = selection[0] - 1
+           if index >= 0:
+               self.playlist_box.select_clear(0, tk.END)
+               self.playlist_box.select_set(index)
+               self.get_selected_file()
+               self.songLength()
 
     def play_next(self):
-        pass
+       selection = self.playlist_box.curselection()
+       if selection:
+           index = selection[0] + 1
+           if index < self.playlist_box.size():
+               self.playlist_box.select_clear(0, tk.END)
+               self.playlist_box.select_set(index)
+               self.get_selected_file()
+               self.songLength()
 
-  
 
-    def stop(self):
-        pass
+    def songLength(self):
+        global file_path
+        if (FileManager.getFileLength(self, file_path)) != 0:
+            total_length = FileManager.getFileLength(self, file_path)
+            current_time = pygame.mixer.music.get_pos() 
+            print(total_length)
+            print(current_time)
+            mins, secs = divmod(current_time, 60)
+            mins = round(mins)
+            secs = round(secs)
+            current_timeformat = '{:02d}:{:02d}'.format(mins, secs)
+
+
+            total_mins, total_secs = divmod(total_length, 60)
+            total_mins = round(total_mins)
+            total_secs = round(total_secs)
+            total_timeformat = '{:02d}:{:02d}'.format(total_mins, total_secs)
+            self.lbl_time_total.config(text= {current_timeformat} + "of " + {total_timeformat})
+        
 
     def set_volume(self, value):
         value = self.volume_slider.get()
         FileManager.set_volume(self, int(value) / 100)  # Scale 0-100 to 0.0-1.0
 
-    def toggle_mute(self, ):
+    def toggle_mute(self):
         if self.var_mute.get():
             pygame.mixer.music.set_volume(0)
         else:
@@ -214,7 +251,7 @@ class AudioPlayerApp:
         
 
     def seek(self, value):
-        pass
+        self.slider_label.config(text=int(float(value)))
 
     
     def show_upload_dialog(self):
@@ -223,23 +260,7 @@ class AudioPlayerApp:
         UploadPopup(self.root, app=self)  # Make sure to pass 'self' as 'app'
 
 
-        '''
-        files = filedialog.askopenfilenames(
-            title="Select Audio Files",
-            filetypes=[("Audio Files", "*.mp3 *.wav *.ogg *.flac"), ("All Files", "*.*")]
-        )
-        if files:
-            popup = tk.Toplevel(self.root)
-            popup.title("Uploaded Files")
-            popup.geometry("400x300")
-            tk.Label(popup, text="Uploaded Files:").pack(pady=5)
-            listbox = tk.Listbox(popup, width=50, height=12)
-            listbox.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
-            for f in files:
-                listbox.insert(tk.END, f)
-            tk.Button(popup, text="Close", command=popup.destroy).pack(pady=5)
 
-'''
     
     def about(self):
         messagebox.showinfo("About", "Audio Player Skeleton\n\nTkinter GUI.\nNo playback functionality implemented yet.")
