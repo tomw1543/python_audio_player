@@ -177,10 +177,7 @@ class AudioPlayerApp:
     def play_pause(self):
         current_text = self.btn_play.cget("text")
 
-        # Prevent trying to play before a file is selected
-        if not hasattr(self, 'file_path'):
-            print("No file selected yet.")
-            return
+       
         
         if current_text == "▶️":
             FileManager.unpause_files(self)
@@ -218,25 +215,6 @@ class AudioPlayerApp:
                self.songLength()
 
 
-    def songLength(self):
-        global file_path
-        if (FileManager.getFileLength(self, file_path)) != 0:
-            total_length = FileManager.getFileLength(self, file_path)
-            current_time = pygame.mixer.music.get_pos() 
-            print(total_length)
-            print(current_time)
-            mins, secs = divmod(current_time, 60)
-            mins = round(mins)
-            secs = round(secs)
-            current_timeformat = '{:02d}:{:02d}'.format(mins, secs)
-
-
-            total_mins, total_secs = divmod(total_length, 60)
-            total_mins = round(total_mins)
-            total_secs = round(total_secs)
-            total_timeformat = '{:02d}:{:02d}'.format(total_mins, total_secs)
-            self.lbl_time_total.config(text= {current_timeformat} + "of " + {total_timeformat})
-        
 
     def set_volume(self, value):
         value = self.volume_slider.get()
@@ -252,6 +230,33 @@ class AudioPlayerApp:
 
     def seek(self, value):
         self.slider_label.config(text=int(float(value)))
+
+
+
+    
+    def songLength(self):
+        global file_path
+        if (FileManager.getFileLength(self, file_path)) != 0:
+            total_length = FileManager.getFileLength(self, file_path)
+            current_time = pygame.mixer.music.get_pos() // 1000 #convert from ms to seconds
+            #print(total_length)
+            #print(current_time)
+            mins, secs = divmod(current_time, 60)
+            mins = round(mins)
+            secs = round(secs)
+            current_timeformat = '{:02d}:{:02d}'.format(mins, secs)
+
+
+            total_mins, total_secs = divmod(total_length, 60)
+            total_mins = round(total_mins)
+            total_secs = round(total_secs)
+            total_timeformat = '{:02d}:{:02d}'.format(total_mins, total_secs)
+            self.lbl_time_total.config(text= current_timeformat + "of " + total_timeformat)
+
+
+            # Schedule this function to run again after 1000ms (1 second)
+            self.lbl_time_total.after(1000, self.songLength)
+           
 
     
     def show_upload_dialog(self):
