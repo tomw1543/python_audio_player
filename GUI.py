@@ -42,7 +42,7 @@ class AudioPlayerApp:
         volume_label = tk.Label(toolbar, text="Vol")
         volume_label.pack(side=tk.LEFT, padx=5)
 
-        self.volume_slider = tk.Scale(toolbar, from_=0, to=100, orient=tk.HORIZONTAL, command=self.set_volume)
+        self.volume_slider = tk.Scale(toolbar, from_=0, to=600, orient=tk.HORIZONTAL, command=self.set_volume)
         self.volume_slider.set(80)
         self.volume_slider.pack(side=tk.LEFT, padx=2)
 
@@ -229,7 +229,9 @@ class AudioPlayerApp:
         
 
     def seek(self, value):
-        self.slider_label.config(text=int(float(value)))
+        slider_val = int(float(value))
+        self.slider_label.config(text=slider_val)
+        pass
 
 
 
