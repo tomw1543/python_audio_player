@@ -228,9 +228,19 @@ class AudioPlayerApp:
             pygame.mixer.music.set_volume(int(value) / 100)
         
 
-    def seek(self, value):
-        slider_val = int(float(value))
+    def slider_update(self):
+        slider_val = 0
+        global file_path
+        if (FileManager.getFileLength(self, file_path)) != 0:
+            total_length = FileManager.getFileLength(self, file_path)
+            current_time = pygame.mixer.music.get_pos() // 1000
+        slider_val = slider_val // current_time if current_time !=0 else 0
         self.slider_label.config(text=slider_val)
+
+
+
+        self.lbl_time_total.after(1000, self.slider_update)
+
         pass
 
 
